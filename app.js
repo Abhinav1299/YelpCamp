@@ -17,6 +17,7 @@ var express=require("express"),
 
 mongoose.connect("mongodb://localhost:27017/YelpCamp",{useNewUrlParser:true});
 app.use(bodyparser.urlencoded({extended:true}));
+app.use(express.static(__dirname + "/public"));
 app.set("view engine","ejs");
 
 seeddb();
