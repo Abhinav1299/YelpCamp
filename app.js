@@ -2,12 +2,14 @@
 var express=require("express"),
     app=express(),
     bodyparser=require("body-parser"),
-    mongoose=require("mongoose")
-    Campground=require("./models/campground")
-    Comment=require("./models/comment")
-    seeddb=require("./seeds")
-    //Comment=require("./models/comment")
-
+    mongoose=require("mongoose"),
+    Campground=require("./models/campground"),
+    Comment=require("./models/comment"),
+    seeddb=require("./seeds"),
+    passport=require("passport"),
+    localstrategy=require("passport-local"),
+    User = require("./models/user"),
+    expresssession=require("express-session")
 
 //mongoose.set('useNewUrlParser',true);
 //mongoose.set('useFindAndModify',false);
@@ -17,7 +19,7 @@ var express=require("express"),
 
 mongoose.connect("mongodb://localhost:27017/YelpCamp",{useNewUrlParser:true});
 app.use(bodyparser.urlencoded({extended:true}));
-app.use(express.static(__dirname + "/public"));
+app.use(express.static(__dirname + "/public"));         // used for css file detection
 app.set("view engine","ejs");
 
 seeddb();
@@ -46,7 +48,27 @@ Campground.create(
 
 
 
+// express-session configuration
+app.use(expresssession({
+    secret : "my name is abhinav gupta",
+    resave : false,
+    saveUninitialized : false
+}));
 
+
+// passport configuration
+app.use(passport.initialize());
+app.use(passport.session());
+
+
+// passport-local configuration
+passport.use(new localstrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+
+
+// main page route
 app.get("/",function(req,res){
     res.render("landing");
 });
@@ -156,6 +178,31 @@ app.post("/campgrounds/:id/comments",function(req,res){
         }
     })
 });
+
+
+// =============================
+//    Authentication Routes
+// =============================
+
+
+// show register form
+app.get("/register",function(req,res){
+    res.render("register");
+})
+
+//handel signup logic
+app.post("/register",function(req,res){
+    User.register(new User({username:req.body.username}),req.body.password,function(err,user){      //register function provided by passport-local-mongoose to user schema
+        if(err)
+        {
+            console.log(err);
+            return res.render("register");
+        }
+        passport.authenticate("local")(req,res,function(){
+            res.redirect("/campgrounds");
+        })
+    })                                                         
+})
 
 app.listen(3000,function(){
     console.log("YelpCamp Server has started...");
