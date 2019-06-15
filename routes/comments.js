@@ -43,6 +43,10 @@ router.post("/",isloggedin,function(req,res){
                 }
                 else
                 {
+                    comment.author.username=req.user.username;
+                    comment.author.id=req.user._id;
+                    comment.save();
+                    console.log(comment);
                     campground.comments.push(comment);
                     campground.save();
                     res.redirect("/campgrounds/"+campground._id);
