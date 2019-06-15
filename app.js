@@ -66,7 +66,10 @@ passport.use(new localstrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
-
+app.use(function(req,res,next){                     // we want to make (req.user) available for all routes,so creating a middleware that is attached to all routes is the solution
+    res.locals.currentuser=req.user;                // whatever we put inside res.locals, is available for all tempelates
+    next();                                         // current user is an object containing username and _id and not the password
+});       
 
 // main page route
 app.get("/",function(req,res){
@@ -74,7 +77,7 @@ app.get("/",function(req,res){
 });
 
 // index route
-app.get("/campgrounds",function(req,res){
+app.get("/campgrounds",function(req,res){               //  (req.user)  contains the inforation about the loggedin user
     
     Campground.find({},function(err,allcampgrounds){
         if(err)
@@ -139,7 +142,7 @@ app.get("/campgrounds/:id",function(req,res){
 
 
 // new route
-app.get("/campgrounds/:id/comments/new",function(req,res){
+app.get("/campgrounds/:id/comments/new",isloggedin,function(req,res){
     Campground.findById(req.params.id,function(err,campground){
         if(err)
         {
@@ -154,7 +157,7 @@ app.get("/campgrounds/:id/comments/new",function(req,res){
 
 
 //create route
-app.post("/campgrounds/:id/comments",function(req,res){
+app.post("/campgrounds/:id/comments",isloggedin,function(req,res){
     Campground.findById(req.params.id,function(err,campground){
         if(err)
         {
@@ -201,8 +204,41 @@ app.post("/register",function(req,res){
         passport.authenticate("local")(req,res,function(){
             res.redirect("/campgrounds");
         })
-    })                                                         
-})
+    });                                                         
+});
+
+
+// show login form
+app.get("/login",function(req,res){
+    res.render("login");
+});
+
+// handeling login logic
+app.post("/login",passport.authenticate("local",                    // using middelware passport.authenticate()
+    {
+        successRedirect:"/campgrounds",
+        failureRedirect:"/login"
+    }),function(req,res){
+
+});
+
+// logout route
+app.get("/logout",function(req,res){
+    req.logout();
+    res.redirect("/campgrounds");
+});
+
+function isloggedin(req,res,next){              // middleware
+    if(req.isAuthenticated())
+    {
+        return next();                  
+    }
+    else
+    {
+        res.render("login");
+    }
+}
+
 
 app.listen(3000,function(){
     console.log("YelpCamp Server has started...");
