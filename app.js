@@ -32,7 +32,7 @@ app.use(bodyparser.urlencoded({extended:true}));
 app.use(express.static(__dirname + "/public"));         // used for css file detection
 app.set("view engine","ejs");
 
-seeddb();
+//seeddb();             //seeding the database
 
 
 /*
