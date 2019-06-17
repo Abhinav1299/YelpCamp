@@ -3,6 +3,8 @@ var express=require("express");
 var router=express.Router();
 var Campground=require("../models/campground");
 
+
+
 // index route
 router.get("/",function(req,res){               //  (req.user)  contains the inforation about the loggedin user
     
@@ -67,6 +69,51 @@ router.get("/:id",function(req,res){
         }
     });
 });
+
+
+// edit campground route
+router.get("/:id/edit",function(req,res){
+    Campground.findById(req.params.id,function(err,foundcamp){
+        if(err)
+        {
+            res.redirect("/campgrounds");
+        }
+        else
+        {
+            res.render("campgrounds/edit",{campground:foundcamp});            
+        }
+    })
+})
+
+
+// update campground route
+router.put("/:id",function(req,res){
+    Campground.findByIdAndUpdate(req.params.id,req.body.campground,function(err,updatecamp){
+        if(err)
+        {
+            res.redirect("/campgrounds");
+        }
+        else
+        {
+            res.redirect("/campgrounds/" + req.params.id);
+        }
+    })
+})
+
+
+// destroy campground route
+router.delete("/:id",function(req,res){
+    Campground.findByIdAndRemove(req.params.id,function(err){
+        if(err)
+        {
+            console.log(err);
+        }
+        else
+        {
+            res.redirect("/campgrounds");
+        }
+    })
+})
 
 function isloggedin(req,res,next){              // middleware
     if(req.isAuthenticated())
