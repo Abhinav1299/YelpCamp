@@ -56,6 +56,50 @@ router.post("/",isloggedin,function(req,res){
     })
 });
 
+//edit route
+router.get("/:commentid/edit",checkcommentownership,function(req,res){
+    Comment.findById(req.params.commentid,function(err,found){
+        if(err)
+        {
+            res.redirect("back");
+        }
+        else
+        {
+            res.render("comments/edit",{campground_id:req.params.id,comment:found});        // refer to topmost comment
+        }
+    })
+})
+
+
+//update route
+router.put("/:commentid",checkcommentownership,function(req,res){
+    Comment.findByIdAndUpdate(req.params.commentid,req.body.comment,function(err,updatecomment){
+        if(err)
+        {
+            res.redirect("back");
+        }
+        else
+        {
+            res.redirect("/campgrounds/"+req.params.id);
+        }
+    })
+})
+
+
+//destroy route
+router.delete("/:commentid",checkcommentownership,function(req,res){
+    Comment.findByIdAndRemove(req.params.commentid,function(err){
+        if(err)
+        {
+            res.redirect("back");
+        }
+        else
+        {
+            res.redirect("/campgrounds/"+req.params.id);
+        }
+    })
+})
+
 function isloggedin(req,res,next){              // middleware
     if(req.isAuthenticated())
     {
@@ -65,6 +109,33 @@ function isloggedin(req,res,next){              // middleware
     {
         res.render("login");
     }
+}
+
+function checkcommentownership(req,res,next){        //middleware
+    if(req.isAuthenticated())
+    {
+        Comment.findById(req.params.commentid,function(err,foundcomment){
+            if(err)
+            {
+                res.redirect("back");
+            }
+            else
+            {
+                if(foundcomment.author.id.equals(req.user._id))            //  (foundcomment.author.id) is a mongoose object while (req.user._id) is a string
+                {
+                    next();
+                }                                          
+                else
+                {
+                    res.redirect("back");
+                }                  
+            }
+        })        
+    }
+    else
+    {
+        res.redirect("back");
+    }    
 }
 
 
