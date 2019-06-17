@@ -10,14 +10,16 @@ var express=require("express"),
     localstrategy=require("passport-local"),
     User = require("./models/user"),
     expresssession=require("express-session")
+    methodoverride=require("method-override");
+
 
 var commentroutes=require("./routes/comments");
 var campgroundroutes=require("./routes/campground");    
 var indexroutes=require("./routes/index");
 
-
-
-
+mongoose.set('useNewUrlParser',true);
+mongoose.set('useFindAndModify',false);
+mongoose.set('useCreateIndex',true);
 
 
 
@@ -32,6 +34,7 @@ app.use(bodyparser.urlencoded({extended:true}));
 app.use(express.static(__dirname + "/public"));         // used for css file detection
 app.set("view engine","ejs");
 
+app.use(methodoverride("_method"));
 //seeddb();             //seeding the database
 //Campground.deleteMany({},function(req,res){});
 //Comment.deleteMany({},function(req,res){});
