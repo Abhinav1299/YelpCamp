@@ -72,22 +72,16 @@ router.get("/:id",function(req,res){
 
 
 // edit campground route
-router.get("/:id/edit",function(req,res){
-    Campground.findById(req.params.id,function(err,foundcamp){
-        if(err)
-        {
-            res.redirect("/campgrounds");
-        }
-        else
-        {
-            res.render("campgrounds/edit",{campground:foundcamp});            
-        }
-    })
+router.get("/:id/edit",checkcampgroundownership,function(req,res){
+    Campground.findById(req.params.id,function(err,foundcamp)
+    {
+        res.render("campgrounds/edit",{campground:foundcamp});  
+    })        
 })
 
 
 // update campground route
-router.put("/:id",function(req,res){
+router.put("/:id",checkcampgroundownership,function(req,res){
     Campground.findByIdAndUpdate(req.params.id,req.body.campground,function(err,updatecamp){
         if(err)
         {
@@ -102,7 +96,7 @@ router.put("/:id",function(req,res){
 
 
 // destroy campground route
-router.delete("/:id",function(req,res){
+router.delete("/:id",checkcampgroundownership,function(req,res){
     Campground.findByIdAndRemove(req.params.id,function(err){
         if(err)
         {
@@ -124,6 +118,33 @@ function isloggedin(req,res,next){              // middleware
     {
         res.render("login");
     }
+}
+
+function checkcampgroundownership(req,res,next){        //middleware
+    if(req.isAuthenticated())
+    {
+        Campground.findById(req.params.id,function(err,foundcamp){
+            if(err)
+            {
+                res.redirect("back");
+            }
+            else
+            {
+                if(foundcamp.author.id.equals(req.user._id))            //  (foundcamp.author.id) is a mongoose object while (req.user._id) is a string
+                {
+                    next();
+                }                                          
+                else
+                {
+                    res.redirect("back");
+                }                  
+            }
+        })        
+    }
+    else
+    {
+        res.redirect("back");
+    }    
 }
 
 

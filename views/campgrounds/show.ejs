@@ -19,10 +19,13 @@
                     <h4><a><%=campground.name%></a></h4>  <!-- link to the direct hotel camping site-->
                     <p><%= campground.description%></p>
                     <p><em>Submitted by : <%= campground.author.username%></em></p>
-                    <a href="/campgrounds/<%=campground._id%>/edit" class="btn btn-warning">Edit</a>
-                    <form id="delete-form" action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
-                        <button class="btn btn-danger">Delete</button>
-                    </form>
+
+                    <%if(currentuser && campground.author.id.equals(currentuser._id)) { %>
+                        <a href="/campgrounds/<%=campground._id%>/edit" class="btn btn-warning">Edit</a>
+                        <form id="delete-form" action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST">
+                            <button class="btn btn-danger">Delete</button>
+                        </form>
+                    <% } %>
                 </div>
             </div>
             <div class="well">
