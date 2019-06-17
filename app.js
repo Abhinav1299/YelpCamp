@@ -33,7 +33,9 @@ app.use(express.static(__dirname + "/public"));         // used for css file det
 app.set("view engine","ejs");
 
 //seeddb();             //seeding the database
-
+//Campground.deleteMany({},function(req,res){});
+//Comment.deleteMany({},function(req,res){});
+//User.deleteMany({},function(req,res){});
 
 /*
 Campground.create(
