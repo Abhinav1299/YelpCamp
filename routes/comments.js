@@ -3,6 +3,8 @@ var express=require("express");
 var router=express.Router({mergeParams:true});              // merge the params from campground to comments
 var Campground=require("../models/campground");
 var Comment=require("../models/comment");
+var middleware=require("../middleware/index.js");
+
 
 
 // ================================
@@ -12,7 +14,7 @@ var Comment=require("../models/comment");
 
 
 // new route
-router.get("/new",isloggedin,function(req,res){
+router.get("/new",middleware.isloggedin,function(req,res){
     Campground.findById(req.params.id,function(err,campground){
         if(err)
         {
@@ -27,7 +29,7 @@ router.get("/new",isloggedin,function(req,res){
 
 
 //create route
-router.post("/",isloggedin,function(req,res){
+router.post("/",middleware.isloggedin,function(req,res){
     Campground.findById(req.params.id,function(err,campground){
         if(err)
         {
@@ -57,7 +59,7 @@ router.post("/",isloggedin,function(req,res){
 });
 
 //edit route
-router.get("/:commentid/edit",checkcommentownership,function(req,res){
+router.get("/:commentid/edit",middleware.checkcommentownership,function(req,res){
     Comment.findById(req.params.commentid,function(err,found){
         if(err)
         {
@@ -72,7 +74,7 @@ router.get("/:commentid/edit",checkcommentownership,function(req,res){
 
 
 //update route
-router.put("/:commentid",checkcommentownership,function(req,res){
+router.put("/:commentid",middleware.checkcommentownership,function(req,res){
     Comment.findByIdAndUpdate(req.params.commentid,req.body.comment,function(err,updatecomment){
         if(err)
         {
@@ -87,7 +89,7 @@ router.put("/:commentid",checkcommentownership,function(req,res){
 
 
 //destroy route
-router.delete("/:commentid",checkcommentownership,function(req,res){
+router.delete("/:commentid",middleware.checkcommentownership,function(req,res){
     Comment.findByIdAndRemove(req.params.commentid,function(err){
         if(err)
         {
@@ -100,43 +102,6 @@ router.delete("/:commentid",checkcommentownership,function(req,res){
     })
 })
 
-function isloggedin(req,res,next){              // middleware
-    if(req.isAuthenticated())
-    {
-        return next();                  
-    }
-    else
-    {
-        res.render("login");
-    }
-}
-
-function checkcommentownership(req,res,next){        //middleware
-    if(req.isAuthenticated())
-    {
-        Comment.findById(req.params.commentid,function(err,foundcomment){
-            if(err)
-            {
-                res.redirect("back");
-            }
-            else
-            {
-                if(foundcomment.author.id.equals(req.user._id))            //  (foundcomment.author.id) is a mongoose object while (req.user._id) is a string
-                {
-                    next();
-                }                                          
-                else
-                {
-                    res.redirect("back");
-                }                  
-            }
-        })        
-    }
-    else
-    {
-        res.redirect("back");
-    }    
-}
 
 
 module.exports=router;
