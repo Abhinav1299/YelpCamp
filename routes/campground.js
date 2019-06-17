@@ -20,18 +20,23 @@ router.get("/",function(req,res){               //  (req.user)  contains the inf
 
 
 // new route
-router.get("/new",function(req,res){
+router.get("/new",isloggedin,function(req,res){
     res.render("campgrounds/new");
 });
 
 
 // create route
-router.post("/",function(req,res){           //to add new capground
+router.post("/",isloggedin,function(req,res){           //to add new capground
     var name=req.body.name;
     var image=req.body.image;
     var description=req.body.description;
-    var newcampground={name:name,image:image,description:description};
+    var author={
+        id: req.user._id,
+        username : req.user.username
+    }
+    var newcampground={name:name,image:image,description:description,author:author};
     //campgrounds.push(newcampground);
+    
     Campground.create(newcampground,function(err,newcreate){
         if(err)
         {
@@ -39,6 +44,7 @@ router.post("/",function(req,res){           //to add new capground
         }
         else
         {
+            console.log(newcreate);
             res.redirect("/campgrounds");       //default redirect is get request
         }
     });
@@ -61,5 +67,17 @@ router.get("/:id",function(req,res){
         }
     });
 });
+
+function isloggedin(req,res,next){              // middleware
+    if(req.isAuthenticated())
+    {
+        return next();                  
+    }
+    else
+    {
+        res.render("login");
+    }
+}
+
 
 module.exports=router;
