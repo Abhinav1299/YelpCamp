@@ -9,19 +9,20 @@ var express=require("express"),
     passport=require("passport"),
     localstrategy=require("passport-local"),
     User = require("./models/user"),
-    expresssession=require("express-session")
-    methodoverride=require("method-override");
+    expresssession=require("express-session"),
+    methodoverride=require("method-override"),
+    flash=require("connect-flash");
 
 
-var commentroutes=require("./routes/comments");
-var campgroundroutes=require("./routes/campground");    
-var indexroutes=require("./routes/index");
 
 mongoose.set('useNewUrlParser',true);
 mongoose.set('useFindAndModify',false);
 mongoose.set('useCreateIndex',true);
 
 
+var commentroutes=require("./routes/comments");
+var campgroundroutes=require("./routes/campground");    
+var indexroutes=require("./routes/index");
 
 //mongoose.set('useNewUrlParser',true);
 //mongoose.set('useFindAndModify',false);
@@ -35,6 +36,8 @@ app.use(express.static(__dirname + "/public"));         // used for css file det
 app.set("view engine","ejs");
 
 app.use(methodoverride("_method"));
+
+app.use(flash());
 //seeddb();             //seeding the database
 //Campground.deleteMany({},function(req,res){});
 //Comment.deleteMany({},function(req,res){});
@@ -63,6 +66,9 @@ Campground.create(
 
 
 
+
+
+
 // express-session configuration
 app.use(expresssession({
     secret : "my name is abhinav gupta",
@@ -83,8 +89,12 @@ passport.deserializeUser(User.deserializeUser());
 
       
 app.use(function(req,res,next){                     // we want to make (req.user) available for all routes,so creating a middleware that is attached to all routes is the solution
-    res.locals.currentuser=req.user;                // whatever we put inside res.locals, is available for all tempelates
-    next();                                         // current user is an object containing username and _id and not the password
+    res.locals.currentuser=req.user;                // whatever we put inside res.locals, is available for all tempelates(.ejs files)
+    res.locals.err=req.flash("err");          // current user is an object containing username and _id and not the password
+    res.locals.success=req.flash("success");
+    next();
+
+
 }); 
 
 app.use("/",indexroutes);                       // order is important
