@@ -7,8 +7,9 @@ var middlewareobj={
         if(req.isAuthenticated())
         {
             Campground.findById(req.params.id,function(err,foundcamp){
-                if(err)
+                if(err || !foundcamp)
                 {
+                    req.flash("err","Campground not found");
                     res.redirect("back");
                 }
                 else
@@ -19,6 +20,7 @@ var middlewareobj={
                     }                                          
                     else
                     {
+                        req.flash("err","you don't have permission to do that..");                        
                         res.redirect("back");
                     }                  
                 }
@@ -26,6 +28,7 @@ var middlewareobj={
         }
         else
         {
+            req.flash("err","You need to be logged in to do that");
             res.redirect("back");
         }    
     },
@@ -34,8 +37,9 @@ var middlewareobj={
         if(req.isAuthenticated())
         {
             Comment.findById(req.params.commentid,function(err,foundcomment){
-                if(err)
+                if(err || !foundcomment)
                 {
+                    req.flash("err","Comment not found.");
                     res.redirect("back");
                 }
                 else
@@ -46,6 +50,7 @@ var middlewareobj={
                     }                                          
                     else
                     {
+                        req.flash("err","You don't have permission to do that");                        
                         res.redirect("back");
                     }                  
                 }
@@ -53,6 +58,7 @@ var middlewareobj={
         }
         else
         {
+            req.flash("err","You need to be logged in to do that.");            
             res.redirect("back");
         }    
     },
@@ -64,7 +70,8 @@ var middlewareobj={
         }
         else
         {
-            res.render("login");
+            req.flash("err","You need to be logged in to do that.");                        // this will not display the message here  // message will be displayed in the login form 
+            res.redirect("/login");             /// updated a bug
         }
     }
 };
