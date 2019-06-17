@@ -59,9 +59,10 @@ router.post("/",middleware.isloggedin,function(req,res){           //to add new 
 // show route
 router.get("/:id",function(req,res){
     Campground.findById(req.params.id).populate("comments").exec(function(err,foundcampground){
-        if(err)
+        if(err || !foundcampground)
         {
-            console.log(err);
+            req.flash("err","Campground not found");
+            res.redirect("back");
         }
         else
         {

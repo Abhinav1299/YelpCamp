@@ -26,10 +26,11 @@ router.post("/register",function(req,res){
     User.register(new User({username:req.body.username}),req.body.password,function(err,user){      //register function provided by passport-local-mongoose to user schema
         if(err)
         {
-            console.log(err);
-            return res.render("register");
+            req.flash("err",err.message);
+            return res.redirect("/register");
         }
         passport.authenticate("local")(req,res,function(){
+            req.flash("success","Welcome to YelpCamp "+user.username);
             res.redirect("/campgrounds");
         })
     });                                                         
@@ -53,18 +54,10 @@ router.post("/login",passport.authenticate("local",                    // using 
 // logout route
 router.get("/logout",function(req,res){
     req.logout();
+    req.flash("success","Logged you out");
     res.redirect("/campgrounds");
 });
 
-function isloggedin(req,res,next){              // middleware
-    if(req.isAuthenticated())
-    {
-        return next();                  
-    }
-    else
-    {
-        res.render("login");
-    }
-}
+
 
 module.exports=router;
